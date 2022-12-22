@@ -20,7 +20,14 @@ Get the API key from https://etherscan.io/ and set the key EHTERSCAN_API_KEY in 
 
 ## Usage
 
-index [options] address
+index [Options] address
+
+<pre>
+Options:
+  -V, --version          output the version number
+  -n, --network <chain>  chain (default: "mainnet")
+  -h, --help             display help for command
+</pre>
 
 ## Example
 
