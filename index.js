@@ -39,6 +39,7 @@ function main(address, options) {
         });
 
         console.log('success!');
+        console.log('Donloaded Folder: sources/' + contractName);
 
         function saveFileWithDir(contractName, filePath, content) {
             const lastSlashPos = filePath.lastIndexOf('/');
