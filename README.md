@@ -25,7 +25,7 @@ index [options] address
 ## Example
 
 ```
-node index --network mainnet 0x2e7b8beE6E94b62B3B5f29BcdA00BE618a27f459 
+node index --network mainnet 0x845a007d9f283614f403a24e3eb3455f720559ca 
 ```
 
 ## Note

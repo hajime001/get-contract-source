@@ -38,6 +38,8 @@ function main(address, options) {
             saveFileWithDir(contractName, filePath, sources[filePath].content);
         });
 
+        console.log('success!');
+
         function saveFileWithDir(contractName, filePath, content) {
             const lastSlashPos = filePath.lastIndexOf('/');
             const directory = SOURCE_DIR + '/' + contractName + '/' + filePath.substring(0, lastSlashPos);
