@@ -16,7 +16,7 @@ npm install
 cp .env.sample .env
 ```
 
-Get the API key from https://etherscan.io/ and set the key EHTERSCAN_API_KEY in the .env file.
+Get the API key from https://etherscan.io/ and set the key ETHERSCAN_API_KEY in the .env file.
 
 ## Usage
 
