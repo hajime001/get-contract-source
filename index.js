@@ -1,6 +1,6 @@
 require('dotenv').config();
 require('commander')
-    .version('0.0.1')
+    .version('0.0.2')
     .usage('[options] address')
     .option('-n, --network <chain>', 'chain', 'mainnet')
     .argument('<address>')
@@ -13,11 +13,17 @@ function main(address, options) {
     const fs = require('fs');
     const TIMEOUT_MSEC = 3000;
     const SOURCE_DIR = 'sources';
-    const etherscanApiKey = process.env['EHTERSCAN_API_KEY'] || "";
+    const etherscanApiKey = process.env['ETHERSCAN_API_KEY'] || "";
 
     if (etherscanApiKey === "") {
-        console.log('Please set EHTERSCAN_API_KEY in .env file.');
+        console.log('Please set ETHERSCAN_API_KEY in .env file.');
         return;
+    }
+
+    // #codeを削る
+    const roundStr = '#code';
+    if (address.slice(-roundStr.length) === roundStr) {
+        address = address.substring(0, address.length - roundStr.length);
     }
 
     if (ethers.utils.isAddress(address) === false) {
@@ -39,7 +45,7 @@ function main(address, options) {
         });
 
         console.log('success!');
-        console.log('Donloaded Folder: sources/' + contractName);
+        console.log('Donloaded Folder: ' + SOURCE_DIR + '/' + contractName);
 
         function saveFileWithDir(contractName, filePath, content) {
             const lastSlashPos = filePath.lastIndexOf('/');
