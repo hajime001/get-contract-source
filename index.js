@@ -1,6 +1,6 @@
 require('dotenv').config();
 require('commander')
-    .version('0.0.2')
+    .version('0.0.3')
     .usage('[options] address')
     .option('-n, --network <chain>', 'chain', 'mainnet')
     .argument('<address>')
@@ -40,8 +40,9 @@ function main(address, options) {
         }
         const contractName = result.ContractName;
         const sources = JSON.parse(result.SourceCode.slice(1).slice(0, -1)).sources; // "{{ ... }}"の形で返却されるので、parse用に前後1文字ずつ削る
-        Object.keys(sources).forEach((filePath) => {
-            saveFileWithDir(contractName, filePath, sources[filePath].content);
+        const filePaths = Object.keys(sources);
+        filePaths.forEach((filePath) => {
+            saveFileWithDir(contractName, filePath, replaceImport(filePaths, filePath, sources[filePath].content));
         });
 
         console.log('success!');
@@ -58,6 +59,32 @@ function main(address, options) {
                     if (err) { throw err; }
                 });
             });
+        }
+
+        function replaceImport(filePaths, filePath, content) {
+            let lines = content.split('\n');
+            const pathPrefix = makePathPrefix(filePath);
+            for(i = 0; i < lines.length; ++i) {
+                const importStr = 'import.*?';
+                const search1 = new RegExp(importStr + '"(.*)');
+                const search2 = new RegExp(importStr + "'(.*)");
+                const result = lines[i].match(search1) || lines[i].match(search2);
+                if (result !== null && result[1].slice(0, 1) !== '.') {
+                    lines[i] = result[0].replace(result[1], pathPrefix + result[1]);
+                }
+            }
+
+            return lines.join('\n');
+        }
+
+        function makePathPrefix(filePath) {
+            const slashCount = (filePath.match(/\//g) || []).length;
+            let prefix = '';
+            for(i = 0; i < slashCount; ++i) {
+                prefix += '../';
+            }
+
+            return prefix;
         }
     });
 }
