@@ -38,7 +38,3 @@ node index --network mainnet 0x845a007d9f283614f403a24e3eb3455f720559ca
 ## Note
 
 The file will be downloaded under the sources directory.
-
-## Issue
-
-This tool downloads maintaining the hierarchy, but perhaps the path is misaligned if you are using npm.
