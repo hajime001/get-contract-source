@@ -18,9 +18,11 @@
   },
   "homepage": "https://github.com/hajime001/get-contract-source#readme",
   "dependencies": {
+    "axios": "^1.2.2",
     "commander": "^9.4.1",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
-    "etherscan-api": "^10.2.0"
+    "etherscan-api": "^10.2.0",
+    "polygonscan-api": "^1.0.4"
   }
 }

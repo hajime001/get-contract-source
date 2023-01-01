@@ -1,8 +1,9 @@
 require('dotenv').config();
 require('commander')
-    .version('0.0.3')
+    .version('0.0.4')
     .usage('[options] address')
-    .option('-n, --network <chain>', 'chain', 'mainnet')
+    .option('-n, --network <network>', 'netwrok', 'mainnet')
+    .option('-c, --chain <chain>', 'chain', 'ethereum')
     .argument('<address>')
     .action((address, options) => {
         main(address, options);
@@ -12,30 +13,22 @@ function main(address, options) {
     const ethers = require('ethers');
     const fs = require('fs');
     const TIMEOUT_MSEC = 3000;
-    const SOURCE_DIR = 'sources';
-    const etherscanApiKey = process.env['ETHERSCAN_API_KEY'] || "";
+    const SOURCE_DIR = 'sources/' + options.chain;
 
-    if (etherscanApiKey === "") {
-        console.log('Please set ETHERSCAN_API_KEY in .env file.');
-        return;
-    }
-
-    // #codeを削る
-    const roundStr = '#code';
-    if (address.slice(-roundStr.length) === roundStr) {
-        address = address.substring(0, address.length - roundStr.length);
-    }
-
-    if (ethers.utils.isAddress(address) === false) {
+    if (!isValidAddress(address)) {
         console.log('invalid address: ' + address);
         return;
     }
 
-    const api = require('etherscan-api').init(etherscanApiKey, options.network, TIMEOUT_MSEC);
-    api.contract.getsourcecode(address).then((rawResult) => {
-        const result = rawResult.result[0];
-        if (result.SourceCode === '') {
-            console.log('Source code not found');
+    const promise = getApiResult(options.chain, options.network, address);
+    if (promise === null) {
+        console.log('sourcecode get failed.');
+        return;
+    }
+
+    promise.then((result) => {
+        if (result === null || result.SourceCode === '') {
+            console.log('source code not found');
             return;
         }
         const contractName = result.ContractName;
@@ -86,5 +79,52 @@ function main(address, options) {
 
             return prefix;
         }
-    });
+    })
+
+    function isValidAddress(address) {
+        // #codeを削る
+        const roundStr = '#code';
+        if (address.slice(-roundStr.length) === roundStr) {
+            address = address.substring(0, address.length - roundStr.length);
+        }
+
+        return ethers.utils.isAddress(address);
+    }
+
+    function getApiResult(chain, network, address) {
+        switch(chain) {
+            case 'ethereum':
+                const etherscanApiKey = process.env['ETHERSCAN_API_KEY'] || "";
+                if (etherscanApiKey === "") {
+                    console.log('Please set ETHERSCAN_API_KEY in .env file.');
+                    return null;
+                }
+                const etherscanApi = require('etherscan-api').init(etherscanApiKey, network, TIMEOUT_MSEC);
+                return etherscanApi.contract.getsourcecode(address).then((rawResult) => {
+                    return rawResult.result[0];
+                });
+            case 'polygon':
+                const polygonscanApiKey = process.env['POLYGONSCAN_API_KEY'] || "";
+                if (polygonscanApiKey === "") {
+                    console.log('Please set POLYGONSCAN_API_KEY in .env file.');
+                    return null;
+                }
+
+                // npmが下記コードに未対応
+                // const polygonscanApi = require('polygonscan-api').init(polygonscanApiKey, network, TIMEOUT_MSEC);
+                // return polygonscanApi.contract.getsourcecode(address);
+
+                const params = new URLSearchParams();
+                params.append('module', 'contract');
+                params.append('action', 'getsourcecode');
+                params.append('address', address);
+                params.append('apikey', polygonscanApiKey);
+                return require('axios').get('https://api.polygonscan.com/api', { params }).then((rawResult) => {
+                    return rawResult.status === 200 ? rawResult.data.result[0] : null;
+                });
+            default:
+                console.log('unknown chain: ' + chain);
+                return null;
+        }
+    }
 }
