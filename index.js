@@ -1,8 +1,8 @@
 require('dotenv').config();
 require('commander')
-    .version('0.0.4')
+    .version('0.0.5')
     .usage('[options] address')
-    .option('-n, --network <network>', 'netwrok', 'mainnet')
+    .option('-n, --network <network>', 'network', 'mainnet')
     .option('-c, --chain <chain>', 'chain', 'ethereum')
     .argument('<address>')
     .action((address, options) => {
@@ -32,7 +32,12 @@ function main(address, options) {
             return;
         }
         const contractName = result.ContractName;
-        const sources = JSON.parse(result.SourceCode.slice(1).slice(0, -1)).sources; // "{{ ... }}"の形で返却されるので、parse用に前後1文字ずつ削る
+        let sources = {};
+        if (isOnce(result.SourceCode)) {
+            sources[contractName + '.sol'] = { content: result.SourceCode };
+        } else {
+            sources = JSON.parse(result.SourceCode.slice(1).slice(0, -1)).sources; // "{{ ... }}"の形で返却されるので、parse用に前後1文字ずつ削る
+        }
         const filePaths = Object.keys(sources);
         filePaths.forEach((filePath) => {
             saveFileWithDir(contractName, filePath, replaceImport(filePaths, filePath, sources[filePath].content));
@@ -80,6 +85,10 @@ function main(address, options) {
             return prefix;
         }
     })
+
+    function isOnce(sourceCode) {
+        return sourceCode.slice(0, 2) !== '{{';
+    }
 
     function isValidAddress(address) {
         // #codeを削る
