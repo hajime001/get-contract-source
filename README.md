@@ -27,7 +27,7 @@ index [Options] address
 Options:
   -V, --version           output the version number
   -n, --network <network> network (default: "mainnet")
-  -c, --chain <chain>     chain [ethereum | polygon] (default: "ethereum")
+  -c, --chain <chain> chain [ethereum | polygon] (default: "ethereum")
   -h, --help              display help for command
 </pre>
 
